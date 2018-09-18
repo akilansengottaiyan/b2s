@@ -1,0 +1,27 @@
+{
+  "name": "b2s",
+  "version": "1.0.0",
+  "description": "books to share app.",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akilansengottaiyan/b2s.git"
+  },
+  "author": "Akilan S",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/akilansengottaiyan/b2s/issues"
+  },
+  "homepage": "https://github.com/akilansengottaiyan/b2s#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "jsonwebtoken": "^8.3.0",
+    "mongoose": "^5.2.15",
+    "morgan": "^1.9.1"
+  }
+}
