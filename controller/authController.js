@@ -1,4 +1,5 @@
 var jwt = require('jsonwebtoken');
+
 var authAdminController = function(req,res,next){
     var token = req.body.token || req.header['x-access-token'];
     if(token){
@@ -19,12 +20,13 @@ var authAdminController = function(req,res,next){
 var authUserController = function(req,res,next){
     var token = req.body.token || req.header['x-access-token'];
     if(token){
-        var jwtSecret = process.env.userToken;
-     jwt.verify(token, jwtSecret, function(err,encoded){
+        var jwtSecret = process.env.TOKEN_SECRET;
+     jwt.verify(token, jwtSecret, function(err,decoded){
          if(err){
            res.status('500').send({auth:false, message:"Failed to authenticate token."});
          }
          else{
+         req.decoded = decoded;
          next();
          }
      });
