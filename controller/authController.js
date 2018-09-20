@@ -21,15 +21,12 @@ var authUserController = function(req,res,next){
     var token = req.body.token || req.header['x-access-token'];
     if(token){
         var jwtSecret = process.env.TOKEN_SECRET;
-     jwt.verify(token, jwtSecret, function(err,decoded){
-         if(err){
-           res.status('500').send({auth:false, message:"Failed to authenticate token."});
-         }
-         else{
+     jwt.verify(token, jwtSecret).then( decoded =>{
          req.decoded = decoded;
          next();
-         }
-     });
+     }).catch( err => {
+         res.sendStatus('500');
+    });
     }
     else{
         res.status('401').send({auth:true, message:"Invalid token"});
