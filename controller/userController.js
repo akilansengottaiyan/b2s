@@ -1,7 +1,6 @@
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
-var User = require('../db/user_model');
-var secret = process.env.TOKEN_SECRET;
+var User = require('../db/userModel');
 
 var register = function(req,res){
     bcrypt.hash(req.body.password, 8).then(hashedPassword => {
@@ -10,7 +9,8 @@ var register = function(req,res){
         password : hashedPassword,
         fname : req.body.fname,
         lname : req.body.lname,
-        dob : req.body.date
+        dob : req.body.date,
+        isadmin : false
     }).then(user => {
         var token = jwt.sign({ email : user.email, id : user._id}, secret ,{expiresIn : 43200});
         res.status('200').send({status : "success", token : token});
@@ -32,6 +32,10 @@ var login = function(req,res){
           if(!status){
               res.status('200').send('Wrong password. Try again');
           }else{
+              var secret = process.env.USER_TOKEN_SECRET;
+              if(user.isAdmin){
+                  secret = process.env.ADMIN_TOKEN_SECRET;
+              }
               var token = jwt.sign({ email : user.email, id : user._id}, secret, {expiresIn : 43200});
               res.status('200').send({status:'success', token : token});
           }

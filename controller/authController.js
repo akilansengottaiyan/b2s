@@ -3,7 +3,7 @@ var jwt = require('jsonwebtoken');
 var authAdminController = function(req,res,next){
     var token = req.body.token || req.header['x-access-token'];
     if(token){
-        var jwtSecret = process.env.adminToken;
+        var jwtSecret = process.env.ADMIN_TOKEN_USER;
      jwt.verify(token, jwtSecret, function(err,encoded){
          if(err){
            res.status('500').send({auth:false, message:"Failed to authenticate token."});
@@ -20,7 +20,7 @@ var authAdminController = function(req,res,next){
 var authUserController = function(req,res,next){
     var token = req.body.token || req.header['x-access-token'];
     if(token){
-        var jwtSecret = process.env.TOKEN_SECRET;
+        var jwtSecret = process.env.USER_TOKEN_SECRET;
      jwt.verify(token, jwtSecret).then( decoded =>{
          req.decoded = decoded;
          next();
