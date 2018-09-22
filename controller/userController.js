@@ -8,16 +8,15 @@ var register = function(req,res){
         email : req.body.email,
         password : hashedPassword,
         fname : req.body.fname,
-        lname : req.body.lname,
-        dob : req.body.date,
-        isadmin : false
+        lname : req.body.lname ? req.body.lname : null,
+        dob : req.body.date ? req.body.date : null,
     }).then(user => {
-        var token = jwt.sign({ email : user.email, id : user._id}, secret ,{expiresIn : 43200});
+        var token = jwt.sign({ email : user.email, id : user._id}, process.env.USER_TOKEN_SECRET ,{expiresIn : 43200});
         res.status('200').send({status : "success", token : token});
-
     })
     }).catch(err =>{
-        res.sendStatus('500');
+        console.log(err);
+        res.status('500').send(err);
     });
 }
 
@@ -32,7 +31,7 @@ var login = function(req,res){
           if(!status){
               res.status('200').send('Wrong password. Try again');
           }else{
-              var secret = process.env.USER_TOKEN_SECRET;
+              var secret = process.env.USER_TOKEN_SECRET.toString('base64');
               if(user.isAdmin){
                   secret = process.env.ADMIN_TOKEN_SECRET;
               }

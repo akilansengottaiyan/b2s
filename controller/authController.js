@@ -18,7 +18,7 @@ var authAdminController = function(req,res,next){
     }
 }
 var authUserController = function(req,res,next){
-    var token = req.body.token || req.header['x-access-token'];
+    var token = req.body.token || req.header('x-access-token');
     if(token){
         var jwtSecret = process.env.USER_TOKEN_SECRET;
      jwt.verify(token, jwtSecret).then( decoded =>{
@@ -29,7 +29,7 @@ var authUserController = function(req,res,next){
     });
     }
     else{
-        res.status('401').send({auth:true, message:"Invalid token"});
+        res.status('401').send({auth:false, message:"Invalid token"});
     }
 }
 

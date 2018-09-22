@@ -11,8 +11,12 @@ var express = require('express'),
 mongoose.connect(config.url);
 app.use(morgan('dev'));
 app.use(bodyparser.urlencoded({ extended:true }));
-app.use(bodyparser.json);
+app.use(bodyparser.json());
 app.listen(PORT);
+
 app.use('/admin',adminRouter);
 app.use('/user',userRouter);
+app.use('/',function(req,res,next){
+    res.status('200').send('WELCOME to B2S...');
+});
 console.log("Server Listening on " + PORT);
