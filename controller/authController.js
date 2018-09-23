@@ -1,26 +1,9 @@
 var jwt = require('jsonwebtoken');
 
 var authAdminController = function(req,res,next){
-    var token = req.body.token || req.header['x-access-token'];
-    if(token){
-        var jwtSecret = process.env.ADMIN_TOKEN_USER;
-     jwt.verify(token, jwtSecret, function(err,encoded){
-         if(err){
-           res.status('500').send({auth:false, message:"Failed to authenticate token."});
-         }
-         else{
-         next();
-         }
-     });
-    }
-    else{
-        res.status('401').send({auth:true, message:"Invalid token"});
-    }
-}
-var authUserController = function(req,res,next){
     var token = req.body.token || req.header('x-access-token');
     if(token){
-        var jwtSecret = process.env.USER_TOKEN_SECRET;
+        var jwtSecret = process.env.ADMIN_TOKEN_SECRET;
      jwt.verify(token, jwtSecret).then( decoded =>{
          req.decoded = decoded;
          next();
@@ -30,6 +13,24 @@ var authUserController = function(req,res,next){
     }
     else{
         res.status('401').send({auth:false, message:"Invalid token"});
+    }
+}
+
+var authUserController = function(req,res,next){
+    var token = req.body.token || req.header('x-access-token');
+    if(token){
+        var jwtSecret = process.env.USER_TOKEN_SECRET;
+     jwt.verify(token, jwtSecret, function(err ,decoded ){
+         if(err){
+            res.status('500').send('Token verification failed.');
+         }
+         req.decoded = decoded;
+         console.log(decoded);
+         next();
+     });
+    }
+    else{
+        res.status('401').send({auth:false, message:"Token not found."});
     }
 }
 
