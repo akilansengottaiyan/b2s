@@ -12,5 +12,5 @@ var userSchema = new schema({
 });
 
 var User = mongoose.model('User',userSchema);
-//var UserMetaData = mongoose.model('UserMetaData',userMetaSchema);
+
 module.exports = User;

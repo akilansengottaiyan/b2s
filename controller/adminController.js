@@ -10,9 +10,4 @@ var listUsers = function(req,res){
    });
 }
 
-var registerAdmin = function(){
-
-}
-
-module.exports.registerAdmin = registerAdmin;
 module.exports.listUsers = listUsers;

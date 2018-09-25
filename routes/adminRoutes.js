@@ -1,8 +1,8 @@
 var express = require('express');
 var adminController = require('../controller/adminController');
-var authController = require('../controller/authController');
+var authoriser = require('../controller/authoriser');
 var adminRouter = express.Router();
 
-adminRouter.get('/profile',authController.authAdminController,adminController.listUsers);
+adminRouter.get('/profile',authoriser.authoriseAdmin,adminController.listUsers);
 
 module.exports = adminRouter;

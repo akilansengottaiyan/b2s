@@ -1,6 +1,6 @@
 var jwt = require('jsonwebtoken');
 
-var authAdminController = function(req,res,next){
+var authoriseAdmin = function(req,res,next){
     var token = req.body.token || req.header('x-access-token');
     if(token){
         var jwtSecret = process.env.ADMIN_TOKEN_SECRET;
@@ -16,7 +16,7 @@ var authAdminController = function(req,res,next){
     }
 }
 
-var authUserController = function(req,res,next){
+var authoriseUser = function(req,res,next){
     var token = req.body.token || req.header('x-access-token');
     if(token){
         var jwtSecret = process.env.USER_TOKEN_SECRET;
@@ -34,5 +34,5 @@ var authUserController = function(req,res,next){
     }
 }
 
-module.exports.authUserController = authUserController ;
-module.exports.authAdminController = authAdminController ;
+module.exports.authoriseUser = authoriseUser ;
+module.exports.authoriseAdmin = authoriseAdmin ;

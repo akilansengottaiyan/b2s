@@ -3,6 +3,7 @@ var bcrypt = require('bcryptjs');
 var User = require('../db/userModel');
 var isEmailValid = require('../utilities/emailValidator');
 var mailSender = require('../utilities/mailSender');
+var sendResponse = require('../utilities/sendResponse');
 
 var register = function(req,res){
     User.findOne({email : req.body.email}).then(user => {
@@ -107,9 +108,6 @@ var updateProfile = function(req,res){
 
 var forgotPassword = function(req,res){
 
-}
-var sendResponse = function(res, status, body){
-   res.status(status).send(body);
 }
 
 var verifyUser = function(req,res){

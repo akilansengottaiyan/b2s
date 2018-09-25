@@ -1,13 +1,13 @@
 var express = require('express');
 var userController = require('../controller/userController');
-var authController = require('../controller/authController');
+var authoriser = require('../utilities/authoriser');
 var userRouter = express.Router();
 
-userRouter.get('/profile', authController.authUserController, userController.getProfile);
+userRouter.get('/profile', authoriser.authoriseUser, userController.getProfile);
+userRouter.get('/verify', userController.verifyUser);
 userRouter.post('/login', userController.login);
 userRouter.post('/register', userController.register);
-userRouter.post('/forgotpassword', authController.authUserController, userController.forgotPassword);
-userRouter.post('/update', authController.authUserController, userController.updateProfile);
-userRouter.get('/verify', userController.verifyUser);
+userRouter.post('/forgotpassword', authoriser.authoriseUser, userController.forgotPassword);
+userRouter.post('/update', authoriser.authoriseUser, userController.updateProfile);
 
 module.exports = userRouter;
