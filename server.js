@@ -8,7 +8,7 @@ var express = require('express'),
     PORT = process.env.PORT;    
     app = express();
 
-mongoose.connect(config.url);
+mongoose.connect(config.url,{useNewUrlParser:true});
 app.use(morgan('dev'));
 app.use(bodyparser.urlencoded({ extended:true }));
 app.use(bodyparser.json());

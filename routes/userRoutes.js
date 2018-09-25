@@ -8,5 +8,6 @@ userRouter.post('/login', userController.login);
 userRouter.post('/register', userController.register);
 userRouter.post('/forgotpassword', authController.authUserController, userController.forgotPassword);
 userRouter.post('/update', authController.authUserController, userController.updateProfile);
+userRouter.get('/verify', userController.verifyUser);
 
 module.exports = userRouter;
