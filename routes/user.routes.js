@@ -1,5 +1,5 @@
 var express = require('express');
-var userController = require('../controller/userController');
+var userController = require('../controller/user.controller');
 var authoriser = require('../utilities/authoriser');
 var userRouter = express.Router();
 

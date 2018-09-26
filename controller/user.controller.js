@@ -1,18 +1,19 @@
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
-var User = require('../db/userModel');
+var User = require('../models/user.model');
 var isEmailValid = require('../utilities/emailValidator');
 var mailSender = require('../utilities/mailSender');
 var sendResponse = require('../utilities/sendResponse');
 
 var register = function(req,res){
+     new Promise((resolve,reject) => {
     User.findOne({email : req.body.email}).then(user => {
      if(user != null){
-         return res.status('200').send("User already exists.");
+         resolve('200', 'User already exists.');
      }
     }).catch( err => {
-         console.log(err)
-         return res.status('500')
+         console.log(err);
+         resolve('500','Internal Server Error.');
     });
     isEmailValid(req.body.email).then( () => {
     bcrypt.hash(req.body.password, 8).then(hashedPassword => {
@@ -27,61 +28,76 @@ var register = function(req,res){
         var token = jwt.sign({ id : user._id, email : user.email}, process.env.USER_TOKEN_SECRET ,{expiresIn : 43200});
         subject = "B2S Verification Email";
         link = "http://" + req.get('host') + '/user/verify?email=' + user.email + '&hash=' + user.randomHash;
-        var body = "Hello,\n Please Click on the link to verify your email within 30 minutes.\n"+link;
+        var body = 'Hello ' +  user.fname + ',<br><a href= "'+ link + '">Click here to verify your emailId';
         mailSender(user.email,subject,body);
-        res.status('200').send({status : "Successfully registered...", token : token});
+        resolve('200',{status :"Successfully registered",token : token});
     }).catch(err =>{
         console.log(err);
-        res.status('500').send(err);
+        resolve('500',err);
     })
     }).catch(err =>{
         console.log(err);
-        res.status('500').send(err);
+        resolve('500',err);
     });
    }).catch (err => {
        console.log(err);
-       res.status('200').send(err);
+       resolve('200',err);
    })
+}).then((status,msg) => {
+    sendResponse(res,status,msg);
+});
 }
 
 var login = function(req,res){
     console.log(req.body);
+    new Promise((resolve,reject) => {
     User.findOne({email : req.body.email}).then(user => {
          if(!user){
-         res.status('200').send('User not found.');
+            resolve('200','User not found');
          }
-         else{
-        console.log(user);
-         var password = req.body.password;
-         bcrypt.compare(password, user.password).then(status =>{
-          if(!status){
-              res.status('200').send('Wrong password. Try again');
-          }else{
-              var secret = process.env.USER_TOKEN_SECRET.toString('base64');
-              if(user.isAdmin){
-                  secret = process.env.ADMIN_TOKEN_SECRET;
-              }
-              var token = jwt.sign({ id : user._id, email : user.email}, secret, {expiresIn : 43200});
-              res.status('200').send({status:'success', token : token});
-          }
+         else
+         {
+            var password = req.body.password;
+            bcrypt.compare(password, user.password).then(status =>{
+            if(!status)
+            {
+                resolve('200','Wrong password.Try again.');
+            }
+            else
+            {
+                var secret = process.env.USER_TOKEN_SECRET.toString('base64');
+                if(user.isAdmin){
+                    secret = process.env.ADMIN_TOKEN_SECRET.toString('base64');
+                }
+                var token = jwt.sign({ id : user._id, email : user.email}, secret, {expiresIn : 43200});
+                resolve('200',{status :"Successfully logged in.",token : token});
+            }
+        }).catch( err => {
+            resolve('500', "Internal Server Error.");
+        });
+        }
+    }).catch( err => {
+        resolve('500', "Internal Server Error.");
     });
-}
-}).catch( err => {
-    res.sendStatus('500');
-});
+    }).then((status,msg) =>{
+        sendResponse(res,status,msg);
+    });
 }
 
 var getProfile = function(req,res){
-
+    new Promise( (resolve,reject) =>{
     User.findOne({_id : req.decoded._id},{email:1,fname:1,lname:1,dob:1,_id:0}).then(user => {
         if(!user){
-        res.status('200').send('User not found.');
+            resolve('200','User not found.');
         }
         else{
-        res.status('200').send(user);
-   }
+            resolve('200',user);
+        }
     }).catch( err => {
-        res.sendStatus('500');
+        resolve('500','Internal Server Error');
+    })
+    }).then((status,msg) => {
+        sendResponse(res,status,msg);
     });
 }
 
@@ -141,7 +157,7 @@ User.findOne({email : req.query.email}).then( user =>{
     }
 }).catch(err => {
     console.log(err);
-    res.sendStatus('500');
+    sendResponse('500','Internal Server Error');
 });
 }
 

@@ -3,8 +3,8 @@ var express = require('express'),
     mongoose = require('mongoose'),
     morgan = require('morgan');
     config = require('./db/config');
-    userRouter = require('./routes/userRoutes');
-    adminRouter = require('./routes/adminRoutes')
+    userRouter = require('./routes/user.routes');
+    adminRouter = require('./routes/admin.routes')
     PORT = process.env.PORT;    
     app = express();
 

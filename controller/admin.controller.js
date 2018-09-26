@@ -1,6 +1,6 @@
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
-var User = require('../db/userModel.js');
+var User = require('../models/user.model');
 
 var listUsers = function(req,res){
    User.find().then(users => {
