@@ -12,6 +12,7 @@ var register = function(req,res){
          resolve('200', 'User already exists.');
      }
     }).catch( err => {
+        console.log("@@@@@@@");
          console.log(err);
          resolve('500','Internal Server Error.');
     });
@@ -30,20 +31,25 @@ var register = function(req,res){
         link = "http://" + req.get('host') + '/user/verify?email=' + user.email + '&hash=' + user.randomHash;
         var body = 'Hello ' +  user.fname + ',<br><a href= "'+ link + '">Click here to verify your emailId';
         mailSender(user.email,subject,body);
-        resolve('200',{status :"Successfully registered",token : token});
+        resolve('200',{status :"Successfully registered", token : token});
     }).catch(err =>{
+        console.log("****");
         console.log(err);
         resolve('500',err);
     })
     }).catch(err =>{
+        console.log("&&&&&&");
         console.log(err);
         resolve('500',err);
     });
    }).catch (err => {
+       console.log("%%%%%%%");
        console.log(err);
        resolve('200',err);
    })
 }).then((status,msg) => {
+    console.log("inside............................");
+    console.log(status);
     sendResponse(res,status,msg);
 });
 }
@@ -146,7 +152,7 @@ User.findOne({email : req.query.email}).then( user =>{
         })
     }).then(() => {
             sendResponse(res,'200','User verification success.');
-            User.update({email : user.email}, {$unset: {randomHash : 1}});
+            User.updateOne({email : user.email}, {$unset: {"randomHash" : 1}});
         }).catch(err => {
             User.remove({_id : user._id});
             sendResponse(res,'200','Sorry. Token expired. Try signup.');
@@ -161,10 +167,15 @@ User.findOne({email : req.query.email}).then( user =>{
 });
 }
 
+var myProjects = function (req,res){
+    
+}
+
 module.exports.register = register;
 module.exports.login = login;
 module.exports.getProfile = getProfile;
 module.exports.forgotPassword = forgotPassword;
 module.exports.updateProfile = updateProfile;
 module.exports.verifyUser = verifyUser;
+module.exports.listProjects = myProjects;
 

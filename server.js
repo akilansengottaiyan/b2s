@@ -4,7 +4,8 @@ var express = require('express'),
     morgan = require('morgan');
     config = require('./db/config');
     userRouter = require('./routes/user.routes');
-    adminRouter = require('./routes/admin.routes')
+    adminRouter = require('./routes/admin.routes');
+    projectRouter = require('./routes/project.routes');
     PORT = process.env.PORT;    
     app = express();
 
@@ -16,6 +17,7 @@ app.listen(PORT);
 
 app.use('/admin',adminRouter);
 app.use('/user',userRouter);
+app.use('/project',projectRouter);
 app.use('/',function(req,res,next){
     res.status('200').send('WELCOME to B2S...');
 });

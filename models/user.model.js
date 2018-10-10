@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var Project = require('./project.model');
 var schema = mongoose.Schema;
 
 var userSchema = new schema({
@@ -8,7 +9,8 @@ var userSchema = new schema({
     email :    {type : String, required : true, unique : true},
     password : {type : String, required : true, max : 30},
     isAdmin : {type: Boolean, default : false},
-    randomHash : {type: String}
+    randomHash : {type: String},
+    projects : [{type : schema.Types.ObjectId, ref : 'Project'}]
 });
 
 var User = mongoose.model('User',userSchema);
