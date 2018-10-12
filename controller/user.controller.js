@@ -9,57 +9,56 @@ var register = function(req,res){
      new Promise((resolve,reject) => {
     User.findOne({email : req.body.email}).then(user => {
      if(user != null){
-         resolve('200', 'User already exists.');
+         resolve({status : '400', body : "User already exists"});
+     }
+     else {
+        isEmailValid(req.body.email).then( () => {
+            bcrypt.hash(req.body.password, 8).then(hashedPassword => {
+            User.create({
+                email : req.body.email,
+                password : hashedPassword,
+                fname : req.body.fname,
+                lname : req.body.lname ? req.body.lname : null,
+                dob : req.body.date ? req.body.date : null,
+                randomHash : jwt.sign({email : req.body.email}, "Vaangada" ,{expiresIn : 120})
+            }).then(user => {
+                var token = jwt.sign({ id : user._id, email : user.email}, process.env.USER_TOKEN_SECRET ,{expiresIn : 43200});
+                subject = "B2S Verification Email";
+                link = "http://" + req.get('host') + '/user/verify?email=' + user.email + '&hash=' + user.randomHash;
+                var body = 'Hello ' +  user.fname + ',<br><a href= "'+ link + '">Click here to verify your emailId';
+                mailSender(user.email,subject,body);
+                resolve({status :200, body : token});
+            }).catch(err =>{
+                console.log(err);
+                reject({status:'500' ,body: err });
+            })
+            }).catch(err =>{
+                console.log(err);
+                reject({status:'500' ,body: err });
+            });
+           }).catch (err => {
+               console.log(err);
+               reject({status:'500' ,body: err });
+           })
      }
     }).catch( err => {
-        console.log("@@@@@@@");
          console.log(err);
-         resolve('500','Internal Server Error.');
+         reject({status:'500' ,body: "Internal Server Error" });
     });
-    isEmailValid(req.body.email).then( () => {
-    bcrypt.hash(req.body.password, 8).then(hashedPassword => {
-    User.create({
-        email : req.body.email,
-        password : hashedPassword,
-        fname : req.body.fname,
-        lname : req.body.lname ? req.body.lname : null,
-        dob : req.body.date ? req.body.date : null,
-        randomHash : jwt.sign({email : req.body.email}, "Vaangada" ,{expiresIn : 120})
-    }).then(user => {
-        var token = jwt.sign({ id : user._id, email : user.email}, process.env.USER_TOKEN_SECRET ,{expiresIn : 43200});
-        subject = "B2S Verification Email";
-        link = "http://" + req.get('host') + '/user/verify?email=' + user.email + '&hash=' + user.randomHash;
-        var body = 'Hello ' +  user.fname + ',<br><a href= "'+ link + '">Click here to verify your emailId';
-        mailSender(user.email,subject,body);
-        resolve('200',{status :"Successfully registered", token : token});
-    }).catch(err =>{
-        console.log("****");
-        console.log(err);
-        resolve('500',err);
-    })
-    }).catch(err =>{
-        console.log("&&&&&&");
-        console.log(err);
-        resolve('500',err);
-    });
-   }).catch (err => {
-       console.log("%%%%%%%");
-       console.log(err);
-       resolve('200',err);
-   })
-}).then((status,msg) => {
-    console.log("inside............................");
-    console.log(status);
-    sendResponse(res,status,msg);
-});
+    
+}).then(result => {
+    sendResponse(res,result);
+}).catch( result => {
+    sendResponse(res,result);
+
+})
 }
 
 var login = function(req,res){
-    console.log(req.body);
     new Promise((resolve,reject) => {
     User.findOne({email : req.body.email}).then(user => {
          if(!user){
-            resolve('200','User not found');
+            resolve({status:'400', body:'User not found'});
          }
          else
          {
@@ -67,7 +66,7 @@ var login = function(req,res){
             bcrypt.compare(password, user.password).then(status =>{
             if(!status)
             {
-                resolve('200','Wrong password.Try again.');
+                resolve({status:'200', body:'Wrong password'});
             }
             else
             {
@@ -76,17 +75,19 @@ var login = function(req,res){
                     secret = process.env.ADMIN_TOKEN_SECRET.toString('base64');
                 }
                 var token = jwt.sign({ id : user._id, email : user.email}, secret, {expiresIn : 43200});
-                resolve('200',{status :"Successfully logged in.",token : token});
+                resolve({status :"200",token : token});
             }
         }).catch( err => {
-            resolve('500', "Internal Server Error.");
+            reject({status:'500',body: "Internal Server Error."});
         });
         }
     }).catch( err => {
-        resolve('500', "Internal Server Error.");
+        reject({status : '500',body: "Internal Server Error."});
     });
-    }).then((status,msg) =>{
-        sendResponse(res,status,msg);
+    }).then( result =>{
+        sendResponse(res,result);
+    }).catch(result => {
+        sendResponse(res,result);
     });
 }
 
@@ -133,38 +134,44 @@ var forgotPassword = function(req,res){
 }
 
 var verifyUser = function(req,res){
-User.findOne({email : req.query.email}).then( user =>{
-    if(!user){
-        sendResponse(res,'200','Sorry. Try signing up again.');
-    }
-    else if(!(user.randomHash)){
-        sendResponse(res,'200','User already verified.');
-    }
-    else if(user.randomHash == req.query.hash){
-        new Promise( (resolve,reject) => {
-        jwt.verify(req.query.hash , 'Vaangada', function(err,decoded){
-            if(err){
-            reject(err);
+    new Promise( (resolve,reject) => {
+        User.findOne({email : req.query.email}).then( user =>{
+            if(!user){
+                reject({status:'400',body:'Sorry.Try signing up again.'});
             }
+            else if(!(user.randomHash)){
+                reject({status:'200',body:'User already verified'});
+            }
+            else if(user.randomHash == req.query.hash){
+                new Promise( (resolve,reject) => {
+                jwt.verify(req.query.hash , 'Vaangada', function(err,decoded){
+                    if(err){
+                    reject(err);
+                    }
+                    else{
+                    resolve();
+                    }
+                })
+            }).then(() => {
+                    resolve({status:'200', body:"User verfication success"});
+                    User.updateOne({email : user.email}, {$unset: {"randomHash" : 1}});
+                }).catch(err => {
+                    User.remove({_id : user._id});
+                    reject({status:'400', body:'Token Expired.'});
+                })
+        }
             else{
-            resolve();
+                reject({status:'401', body:'Token Invalid.'});
             }
-        })
-    }).then(() => {
-            sendResponse(res,'200','User verification success.');
-            User.updateOne({email : user.email}, {$unset: {"randomHash" : 1}});
         }).catch(err => {
-            User.remove({_id : user._id});
-            sendResponse(res,'200','Sorry. Token expired. Try signup.');
-        })
-   }
-    else{
-        sendResponse(res,'401','Token invalid');
-    }
-}).catch(err => {
-    console.log(err);
-    sendResponse('500','Internal Server Error');
-});
+            console.log(err);
+            reject({status:'500', body:'Internal Server Error'});
+        });
+    }).then(result => {
+        sendResponse(result);
+    }).catch(result => {
+        sendResponse(result);
+    });
 }
 
 var myProjects = function (req,res){

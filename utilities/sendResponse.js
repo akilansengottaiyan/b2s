@@ -1,4 +1,4 @@
-var sendResponse = function(res, status, body){
-    res.status(status).send(body);
+var sendResponse = function(res, result){
+    res.status(result.status).send(result.body);
  }
  module.exports = sendResponse;
