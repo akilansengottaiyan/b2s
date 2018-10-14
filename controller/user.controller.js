@@ -75,7 +75,7 @@ var login = function(req,res){
                     secret = process.env.ADMIN_TOKEN_SECRET.toString('base64');
                 }
                 var token = jwt.sign({ id : user._id, email : user.email}, secret, {expiresIn : 43200});
-                resolve({status :"200",token : token});
+                resolve({status :"200",body : {token : token} } );
             }
         }).catch( err => {
             reject({status:'500',body: "Internal Server Error."});
@@ -174,9 +174,6 @@ var verifyUser = function(req,res){
     });
 }
 
-var myProjects = function (req,res){
-    
-}
 
 module.exports.register = register;
 module.exports.login = login;
@@ -184,5 +181,3 @@ module.exports.getProfile = getProfile;
 module.exports.forgotPassword = forgotPassword;
 module.exports.updateProfile = updateProfile;
 module.exports.verifyUser = verifyUser;
-module.exports.listProjects = myProjects;
-

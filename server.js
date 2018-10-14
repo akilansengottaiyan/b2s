@@ -14,11 +14,11 @@ app.use(morgan('dev'));
 app.use(bodyparser.urlencoded({ extended:true }));
 app.use(bodyparser.json());
 app.listen(PORT);
-
+app.use(express.static('public'));
 app.use('/admin',adminRouter);
 app.use('/user',userRouter);
 app.use('/project',projectRouter);
 app.use('/',function(req,res,next){
-    res.status('200').send('WELCOME to B2S...');
+    res.sendFile('index.html', {root: './public'}); // load the single view file (angular will handle the page changes on the front-end)
 });
 console.log("Server Listening on " + PORT);

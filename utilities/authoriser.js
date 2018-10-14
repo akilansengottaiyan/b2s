@@ -2,7 +2,7 @@ var jwt = require('jsonwebtoken');
 var jwtSecret ;
 
 var commonAuth = function(req,res,next){
-    var token = req.body.token || req.header('x-access-token');
+    var token = req.body.token || req.header('Authorisation');
     if(token){
      new Promise((resolve,reject) => {
         jwt.verify(token, jwtSecret, function(err ,decoded ){
