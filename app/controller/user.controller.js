@@ -6,6 +6,9 @@ var mailSender = require('../utilities/mailSender');
 var sendResponse = require('../utilities/sendResponse');
 
 var register = function(req,res){
+    console.log(req);
+    console.log("-------------------");
+    console.log(req.body);
     new Promise((resolve,reject) => {
    User.findOne({email : req.body.email}).then(user => {
     if(user != null)
@@ -25,19 +28,19 @@ var register = function(req,res){
                 dob : req.body.date ? req.body.date : null,
                 randomHash : jwt.sign({email : req.body.email}, "Vaangada" ,{expiresIn : 120}) });
         }).then(user => {
-                var token = jwt.sign({ id : user._id, email : user.email}, process.env.USER_TOKEN_SECRET ,{expiresIn : 43200});
                 subject = "B2S Verification Email";
                 link = "http://" + req.get('host') + '/user/verify?email=' + user.email + '&hash=' + user.randomHash;
                 var body = 'Hello ' +  user.fname + ',<br><a href= "'+ link + '">Click here to verify your emailId';
                 mailSender(user.email,subject,body);
-                resolve({status :200, body : token});
+                resolve({status :200, body : "Registration Success. Verify your email"});
         }).catch( err => {
             console.log(err);
-            reject({status:'500' ,body: "Internal Server Error" }); 
+            reject({status:'500' ,body: err }); 
       })
     }
     });
     }).then(result => {
+    //res.redirect('html/login.html');
     sendResponse(res,result);
     }).catch( result => {
     sendResponse(res,result);
@@ -52,19 +55,26 @@ var login = function(req,res){
          }
          else
          {
-            bcrypt.compare(req.body.password, user.password).then(status =>{
-            if(!status)
-                resolve({status:'200', body:'Wrong password'});
+            if(user.randomHash)
+            {
+                resolve({status:'200', body:'Verify your email-id to proceed'});
+            }
             else
             {
-                var secret = (user.isAdmin)? process.env.ADMIN_TOKEN_SECRET.toString('base64') : process.env.USER_TOKEN_SECRET.toString('base64');
-                var token = jwt.sign({ id : user._id, email : user.email}, secret, {expiresIn : 43200});
-                resolve({status :"200",body : {token : token} } );
+                bcrypt.compare(req.body.password, user.password).then(status =>{
+                if(!status)
+                    resolve({status:'200', body:'Wrong password'});
+                else
+                {
+                    var secret = (user.isAdmin)? process.env.ADMIN_TOKEN_SECRET.toString('base64') : process.env.USER_TOKEN_SECRET.toString('base64');
+                    var token = jwt.sign({ id : user._id, email : user.email}, secret, {expiresIn : 43200});
+                    resolve({status :"200",body : {token : token} } );
+                }
+                }).catch( err => {
+                    reject({status:'500',body: "Internal Server Error."});
+                });
             }
-        }).catch( err => {
-            reject({status:'500',body: "Internal Server Error."});
-        });
-        }
+    }
     }).catch( err => {
         reject({status : '500',body: "Internal Server Error."});
     });
