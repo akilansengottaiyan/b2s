@@ -1,14 +1,11 @@
-var jwt = require('jsonwebtoken');
-var bcrypt = require('bcryptjs');
-var User = require('../models/user.model');
-var isEmailValid = require('../utilities/emailValidator');
-var mailSender = require('../utilities/mailSender');
-var sendResponse = require('../utilities/sendResponse');
+const jwt = require('jsonwebtoken'),
+      bcrypt = require('bcryptjs'),
+      User = require('../models/user.model'),
+      isEmailValid = require('../utilities/emailValidator'),
+      mailSender = require('../utilities/mailSender'),
+      sendResponse = require('../utilities/sendResponse');
 
 var register = function(req,res){
-    console.log(req);
-    console.log("-------------------");
-    console.log(req.body);
     new Promise((resolve,reject) => {
    User.findOne({email : req.body.email}).then(user => {
     if(user != null)
@@ -40,7 +37,6 @@ var register = function(req,res){
     }
     });
     }).then(result => {
-    //res.redirect('html/login.html');
     sendResponse(res,result);
     }).catch( result => {
     sendResponse(res,result);
