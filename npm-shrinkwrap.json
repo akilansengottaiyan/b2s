@@ -208,6 +208,20 @@
       "resolved": "http://nexus.wdf.sap.corp:8081/nexus/repository/build.milestones.npm/cookie/-/cookie-0.3.1.tgz",
       "integrity": "sha1-5+Ch+e9DtMi6klxcWpboBtFoc7s="
     },
+    "cookie-encrypter": {
+      "version": "1.0.1",
+      "resolved": "http://nexus.wdf.sap.corp:8081/nexus/repository/build.milestones.npm/cookie-encrypter/-/cookie-encrypter-1.0.1.tgz",
+      "integrity": "sha512-T0EPLKs2vwyaJyRIs3oZ3B/52ny3e09KK+JiMf/6orthjFYCPPX+L8ahlYlipUjIf+ZfXvC0RqDCrxqRRFa05A=="
+    },
+    "cookie-parser": {
+      "version": "1.4.3",
+      "resolved": "http://nexus.wdf.sap.corp:8081/nexus/repository/build.milestones.npm/cookie-parser/-/cookie-parser-1.4.3.tgz",
+      "integrity": "sha1-D+MfoZ0AC5X0qt8fU/3CuKIDuqU=",
+      "requires": {
+        "cookie": "0.3.1",
+        "cookie-signature": "1.0.6"
+      }
+    },
     "cookie-signature": {
       "version": "1.0.6",
       "resolved": "http://nexus.wdf.sap.corp:8081/nexus/repository/build.milestones.npm/cookie-signature/-/cookie-signature-1.0.6.tgz",

@@ -1,9 +1,18 @@
 const jwt = require('jsonwebtoken'),
       bcrypt = require('bcryptjs'),
+      cookieParser = require('cookie-parser'),
+      cookieEncrypter = require('cookie-encrypter'),
       User = require('../models/user.model'),
       isEmailValid = require('../utilities/emailValidator'),
       mailSender = require('../utilities/mailSender'),
       sendResponse = require('../utilities/sendResponse');
+         
+const cookieParams = {
+        httpOnly: true,
+        signed: true,
+        maxAge: 300000,
+        secure : true
+      };
 
 var register = function(req,res){
     new Promise((resolve,reject) => {
@@ -26,7 +35,7 @@ var register = function(req,res){
                 randomHash : jwt.sign({email : req.body.email}, "Vaangada" ,{expiresIn : 120}) });
         }).then(user => {
                 subject = "B2S Verification Email";
-                link = "http://" + req.get('host') + '/user/verify?email=' + user.email + '&hash=' + user.randomHash;
+                link = "https://" + req.get('host') + '/user/verify?email=' + user.email + '&hash=' + user.randomHash;
                 var body = 'Hello ' +  user.fname + ',<br><a href= "'+ link + '">Click here to verify your emailId';
                 mailSender(user.email,subject,body);
                 resolve({status :200, body : "Registration Success. Verify your email"});
@@ -37,6 +46,7 @@ var register = function(req,res){
     }
     });
     }).then(result => {
+        console.log(result);
     sendResponse(res,result);
     }).catch( result => {
     sendResponse(res,result);
@@ -64,10 +74,11 @@ var login = function(req,res){
                 {
                     var secret = (user.isAdmin)? process.env.ADMIN_TOKEN_SECRET.toString('base64') : process.env.USER_TOKEN_SECRET.toString('base64');
                     var token = jwt.sign({ id : user._id, email : user.email}, secret, {expiresIn : 43200});
-                    resolve({status :"200",body : {token : token} } );
+                    res.cookie('jwttoken', token, cookieParams);
+                    resolve({status :"200",body : "Login Successful" } );
                 }
                 }).catch( err => {
-                    reject({status:'500',body: "Internal Server Error."});
+                    reject({status:'500',body: "Internal Server Error."+ err});
                 });
             }
     }
@@ -83,43 +94,34 @@ var login = function(req,res){
 
 var getProfile = function(req,res){
     new Promise( (resolve,reject) =>{
-    User.findOne({_id : req.decoded._id},{email:1,fname:1,lname:1,dob:1,_id:0}).then(user => {
+    User.findOne({email : req.decoded.email},{email:1,fname:1,lname:1,dob:1,_id:0}).then(user => {
         if(!user){
-            resolve('200','User not found.');
+            resolve({status :'200', body :'User not found.'});
         }
         else{
-            resolve('200',user);
+            resolve({status : '200', body :user});
         }
     }).catch( err => {
-        resolve('500','Internal Server Error');
+        resolve({status :'500', body :'Internal Server Error'});
     })
-    }).then((status,msg) => {
-        sendResponse(res,status,msg);
+    }).then((result) => {
+        sendResponse(res,result);
     });
 }
 
 var updateProfile = function(req,res){
-    User.findOne({_id : req.decoded._id}).then( user => {
-        var updatedUser = new User(
-        {   _id : user._id,
-            fname : req.body.fname ? req.body.fname : user.fname,
-            lname : req.body.lname ? req.body.lname : user.lname,
-            password : req.body.password ? bcrypt.hashSync(req.body.password,8) : user.password
-        });
-        updateUser.isNew = false;
-        updateUser.save().then( u => {
-            res.status('200').send('User profile updated successfully...');
+    User.findOne({email : req.decoded.email}).then( user => {
+        return user.updateOne(req.body);
+    }).then( () => {
+        sendResponse(res,{status :'200', body :'User profile updated successfully...'});
     }).catch( err => {
-            res.status('500').send(err);
+        sendResponse(res,{status : '500' , body:err});;
         console.log(err);
-    })
-}).catch( err => {
-    res.status('500').send(err);
-    console.log(err);
-});
+    });
 }
 
 var forgotPassword = function(req,res){
+
 
 }
 
@@ -158,10 +160,15 @@ var verifyUser = function(req,res){
             reject({status:'500', body:'Internal Server Error'});
         });
     }).then(result => {
-        sendResponse(result);
+        sendResponse(res,result);
     }).catch(result => {
-        sendResponse(result);
+        sendResponse(res,result);
     });
+}
+
+var logOut = function(req,res,next){
+    res.clearCookie('jwttoken');
+    sendResponse(res,{status : 200, body : "Logged Out Successful"});
 }
 
 module.exports.register = register;
@@ -170,3 +177,4 @@ module.exports.getProfile = getProfile;
 module.exports.forgotPassword = forgotPassword;
 module.exports.updateProfile = updateProfile;
 module.exports.verifyUser = verifyUser;
+module.exports.logOut = logOut;

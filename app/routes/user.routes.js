@@ -7,6 +7,7 @@ const express = require('express'),
   
 userRouter.get('/profile', authoriser.authoriseUser, userController.getProfile);
 userRouter.get('/verify', userController.verifyUser);
+userRouter.get('/logout', userController.logOut);
 userRouter.post('/login', validator.login, userController.login);
 userRouter.post('/register', validator.register, userController.register);
 userRouter.post('/forgotpassword', authoriser.authoriseUser, validator.forgotPassword, userController.forgotPassword);
