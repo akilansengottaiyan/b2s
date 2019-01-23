@@ -4,8 +4,7 @@ const jwt = require('jsonwebtoken'),
 var jwtSecret ;
 
 var commonAuth = function(req,res,next){
-    console.log(req);
-    var token = req.cookies.jwttoken;
+    var token = req.signedCookies.jwttoken;
     if(token){
      new Promise((resolve,reject) => {
         jwt.verify(token, jwtSecret, function(err ,decoded ){

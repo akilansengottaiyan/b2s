@@ -36,6 +36,7 @@ app.use(cookieEncrypter(COOKIE_SECRET));
 app.use(express.static('front/'));
 
 //app.post('/*',validator.sanitisation);
+
 app.use('/admin',adminRouter);
 app.use('/user',userRouter);
 app.use('/project',projectRouter);
