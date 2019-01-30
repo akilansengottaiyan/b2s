@@ -1,1 +1,0 @@
-angular.module('b2s',['b2s.controllers','b2s.services','ngRoute','appRoutes']);
